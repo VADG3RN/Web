@@ -11,6 +11,7 @@ def index(request):
         response = redirect('index')
         response.delete_cookie('news_preferences')
         return response
+    
     # Получаем настройки из cookies
     preferences_str = request.COOKIES.get('news_preferences', '{}')
     try:
@@ -21,11 +22,7 @@ def index(request):
     # Устанавливаем начальные значения по умолчанию
     default_preferences = {
         'categories': [],
-        'language': 'ru',
         'theme': 'light',
-        'email_notifications': False,
-        'start_date': (timezone.now() - timedelta(days=7)).strftime('%Y-%m-%d'),
-        'end_date': timezone.now().strftime('%Y-%m-%d')
     }
     
     # Объединяем с настройками по умолчанию
@@ -35,38 +32,30 @@ def index(request):
     # Создаем форму с текущими настройками
     form_initial = {
         'categories': preferences.get('categories', []),
-        'language': preferences.get('language', 'ru'),
         'theme': preferences.get('theme', 'light'),
-        'email_notifications': preferences.get('email_notifications', False),
-        'start_date': preferences.get('start_date'),
-        'end_date': preferences.get('end_date')
     }
     
     form = NewsPreferencesForm(initial=form_initial)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and 'reset' not in request.POST:
         form = NewsPreferencesForm(request.POST)
         if form.is_valid():
             # Сохраняем настройки в cookies
             response = redirect('index')
             preferences = {
                 'categories': form.cleaned_data['categories'],
-                'language': form.cleaned_data['language'],
                 'theme': form.cleaned_data['theme'],
-                'email_notifications': form.cleaned_data['email_notifications'],
-                'start_date': form.cleaned_data['start_date'].strftime('%Y-%m-%d') if form.cleaned_data['start_date'] else None,
-                'end_date': form.cleaned_data['end_date'].strftime('%Y-%m-%d') if form.cleaned_data['end_date'] else None
             }
             response.set_cookie('news_preferences', json.dumps(preferences), max_age=30*24*60*60)
             return response
     
-    # Данные новостей с картинками
+    # Данные новостей
     news_items = [
         {
             'id': 1,
             'title': 'Важные политические события в мире', 
             'category': 'politics', 
-            'date': '2024-01-15',
+            'date': '2025-01-15',
             'image': 'politics-news.jpg',
             'content': 'Международные переговоры привели к важным соглашениям между странами.'
         },
@@ -74,15 +63,15 @@ def index(request):
             'id': 2,
             'title': 'Новые технологии в IT индустрии', 
             'category': 'tech', 
-            'date': '2024-01-14',
-            'image': 'tech-news.jpg',
+            'date': '2025-01-14',
+            'image': 'technology-news.jpg',
             'content': 'Компания Apple представила новый революционный продукт.'
         },
         {
             'id': 3,
             'title': 'Спортивные достижения сборной', 
             'category': 'sports', 
-            'date': '2024-01-13',
+            'date': '2025-01-13',
             'image': 'sports-news.jpg',
             'content': 'Наши спортсмены завоевали золотые медали на чемпионате мира.'
         },
@@ -90,7 +79,7 @@ def index(request):
             'id': 4,
             'title': 'Экономические реформы', 
             'category': 'economy', 
-            'date': '2024-01-12',
+            'date': '2025-01-12',
             'image': 'economy-news.jpg',
             'content': 'Правительство объявило о новых мерах поддержки бизнеса.'
         },
@@ -98,35 +87,25 @@ def index(request):
             'id': 5,
             'title': 'Культурные события недели', 
             'category': 'culture', 
-            'date': '2024-01-11',
-            'image': 'culture-news.jpg',
+            'date': '2025-01-11',
+            'image': 'culture-news.jpg', 
             'content': 'В столице открылась новая выставка современного искусства.'
         },
         {
             'id': 6,
             'title': 'Научные открытия года', 
             'category': 'science', 
-            'date': '2024-01-10',
+            'date': '2025-01-10',
             'image': 'science-news.jpg',
             'content': 'Ученые сделали прорыв в области квантовых вычислений.'
         }
     ]
     
-    # Фильтруем новости по выбранным категориям
     selected_categories = preferences.get('categories', [])
-    if not selected_categories:  # Если категории не выбраны - показываем все
+    if not selected_categories:
         filtered_news = news_items
     else:
         filtered_news = [news for news in news_items if news['category'] in selected_categories]
-    
-    # Фильтруем по дате
-    start_date = preferences.get('start_date')
-    end_date = preferences.get('end_date')
-    
-    if start_date:
-        filtered_news = [news for news in filtered_news if news['date'] >= start_date]
-    if end_date:
-        filtered_news = [news for news in filtered_news if news['date'] <= end_date]
     
     context = {
         'form': form,

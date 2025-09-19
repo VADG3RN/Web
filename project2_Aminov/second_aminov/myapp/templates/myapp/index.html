@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Персонализированные новости</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/theme-{{ preferences.theme|default:'light' }}.css">
+    {% if preferences.theme == 'dark' %}
+    <link rel="stylesheet" href="/static/css/theme-dark.css">
+    {% else %}
+    {# style.css #}
+    {% endif %}
 </head>
 <body>
     <div class="container">
@@ -26,30 +30,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>{{ form.language.label }}</label>
-                        {{ form.language }}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>{{ form.theme.label }}</label>
+                        <label>Тема</label>
                         {{ form.theme }}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>{{ form.start_date.label }}</label>
-                        {{ form.start_date }}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>{{ form.end_date.label }}</label>
-                        {{ form.end_date }}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            {{ form.email_notifications }}
-                            {{ form.email_notifications.label }}
-                        </label>
                     </div>
                     
                     <button type="submit">Сохранить настройки</button>
@@ -57,20 +39,14 @@
             </section>
 
             <section class="news-feed">
-            <h2>Ваша лента новостей ({{ news_items|length }} новостей)</h2>
-            
-                <div class="debug-info" style="display: none; background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
-                    <p><strong>Отладка:</strong></p>
-                    <p>Выбранные категории: {{ preferences.categories }}</p>
-                    <p>Дата от: {{ preferences.start_date }}</p>
-                    <p>Дата до: {{ preferences.end_date }}</p>
-                </div>
+                <h2>Ваша лента новостей ({{ news_items|length }} новостей)</h2>
                 
                 <div class="news-grid">
                     {% for news in news_items %}
                     <div class="news-card">
                         <div class="news-image">
-                            <img src="/static/images/{{ news.image }}" alt="{{ news.title }}" onerror="this.src='/static/images/default-news.jpg'">
+                            <img src="/static/images/{{ news.image }}" alt="{{ news.title }}" 
+                                onerror="this.src='/static/images/default-news.jpg'">
                         </div>
                         <div class="news-content">
                             <h3>{{ news.title }}</h3>
@@ -113,7 +89,6 @@
                     </div>
                 </div>
             </section>
-            
         </main>
 
         <footer>

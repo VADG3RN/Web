@@ -1,18 +1,105 @@
+/* Темная тема */
 body {
     background: #1a1a1a;
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .preferences-form {
     background: #2d2d2d;
+    color: #ffffff;
+}
+
+.preferences-form label {
+    color: #ffffff !important;
 }
 
 .news-card {
     background: #333;
-    color: #fff;
+    color: #ffffff;
+    border: 1px solid #444;
+}
+
+.news-content h3 {
+    color: #4da6ff !important;
+}
+
+.news-date, .news-category {
+    color: #cccccc !important;
+}
+
+.news-excerpt {
+    color: #ffffff !important;
+}
+
+.read-more {
+    color: #4da6ff !important;
+}
+
+.read-more:hover {
+    color: #80c1ff !important;
 }
 
 .content-card {
     background: #2d2d2d;
-    color: #fff;
+    color: #ffffff;
+    border: 1px solid #444;
+}
+
+.content-card h3 {
+    color: #4da6ff !important;
+}
+
+.content-card p {
+    color: #cccccc !important;
+}
+
+footer {
+    border-top: 2px solid #444;
+    color: #cccccc !important;
+}
+
+.no-news {
+    color: #cccccc !important;
+}
+
+/* Стили для формы в темной теме */
+input[type="text"],
+input[type="date"],
+select {
+    background: #333;
+    color: #ffffff;
+    border: 2px solid #555;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+select:focus {
+    border-color: #4da6ff;
+    outline: none;
+}
+
+/* Стили для чекбоксов и радиокнопок */
+input[type="checkbox"],
+input[type="radio"] {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+/* Стили для выпадающих списков */
+option {
+    background: #333;
+    color: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6,
+p, span, div,
+label, li {
+    color: #ffffff !important;
+}
+
+h1 {
+    color: #4da6ff !important;
+}
+
+h2 {
+    color: #66b3ff !important;
 }
