@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import home_page_view, password_view
+from . import views 
 
 urlpatterns = [
-    path('', home_page_view, name='home'),
-    path('password/', password_view, name='password_view'),
+    path('', views.index, name='index'),
+    path('visited/<str:page_name>/', views.save_visited_page, name='save_visited_page'),
 ]

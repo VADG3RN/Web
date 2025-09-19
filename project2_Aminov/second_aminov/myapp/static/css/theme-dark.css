@@ -1,0 +1,18 @@
+body {
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
+.preferences-form {
+    background: #2d2d2d;
+}
+
+.news-card {
+    background: #333;
+    color: #fff;
+}
+
+.content-card {
+    background: #2d2d2d;
+    color: #fff;
+}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Персонализированные новости</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/theme-{{ preferences.theme|default:'light' }}.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📰 Персонализированные новости</h1>
+            <p>Настройте свою ленту новостей по вашим предпочтениям</p>
+        </header>
+
+        <main>
+            <section class="preferences-form">
+                <h2>Настройки новостей</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>Категории новостей:</label>
+                        {{ form.categories }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.language.label }}</label>
+                        {{ form.language }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.theme.label }}</label>
+                        {{ form.theme }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.start_date.label }}</label>
+                        {{ form.start_date }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.end_date.label }}</label>
+                        {{ form.end_date }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            {{ form.email_notifications }}
+                            {{ form.email_notifications.label }}
+                        </label>
+                    </div>
+                    
+                    <button type="submit">Сохранить настройки</button>
+                </form>
+            </section>
+
+            <section class="news-feed">
+            <h2>Ваша лента новостей ({{ news_items|length }} новостей)</h2>
+            
+                <div class="debug-info" style="display: none; background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                    <p><strong>Отладка:</strong></p>
+                    <p>Выбранные категории: {{ preferences.categories }}</p>
+                    <p>Дата от: {{ preferences.start_date }}</p>
+                    <p>Дата до: {{ preferences.end_date }}</p>
+                </div>
+                
+                <div class="news-grid">
+                    {% for news in news_items %}
+                    <div class="news-card">
+                        <div class="news-image">
+                            <img src="/static/images/{{ news.image }}" alt="{{ news.title }}" onerror="this.src='/static/images/default-news.jpg'">
+                        </div>
+                        <div class="news-content">
+                            <h3>{{ news.title }}</h3>
+                            <p class="news-date">📅 {{ news.date }}</p>
+                            <p class="news-category">🏷️ {{ news.category }}</p>
+                            <p class="news-excerpt">{{ news.content }}</p>
+                            <a href="/visited/news-{{ news.id }}/" class="read-more">Читать далее →</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-news">
+                        <p>Новости не найдены. Попробуйте изменить фильтры или сбросить настройки.</p>
+                        <form method="post" style="margin-top: 20px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="reset" value="true">
+                            <button type="submit" style="background: #28a745;">Сбросить настройки</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="additional-content">
+                <h2>О нашем сервисе</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <img src="/static/images/news-icon.png" alt="Новости" width="50">
+                        <h3>Актуальные новости</h3>
+                        <p>Всегда свежие и проверенные новости из надежных источников</p>
+                    </div>
+                    <div class="content-card">
+                        <img src="/static/images/personalization-icon.png" alt="Персонализация" width="50">
+                        <h3>Индивидуальный подход</h3>
+                        <p>Только те новости, которые интересны именно вам</p>
+                    </div>
+                    <div class="content-card">
+                        <img src="/static/images/security-icon.png" alt="Безопасность" width="50">
+                        <h3>Конфиденциальность</h3>
+                        <p>Ваши предпочтения сохраняются только локально</p>
+                    </div>
+                </div>
+            </section>
+            
+        </main>
+
+        <footer>
+            <p>© 2025 Персонализированные новости. Все права защищены.</p>
+        </footer>
+    </div>
+</body>
+</html>
