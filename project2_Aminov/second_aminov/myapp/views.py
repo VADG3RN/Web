@@ -1,54 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import NewsPreferencesForm
-import json
-from datetime import datetime, timedelta
-from django.utils import timezone
 
 def index(request):
-    # Обработка сброса настроек
-    if request.method == 'POST' and 'reset' in request.POST:
-        response = redirect('index')
-        response.delete_cookie('news_preferences')
-        return response
-    
-    # Получаем настройки из cookies
-    preferences_str = request.COOKIES.get('news_preferences', '{}')
-    try:
-        preferences = json.loads(preferences_str)
-    except json.JSONDecodeError:
-        preferences = {}
-    
-    # Устанавливаем начальные значения по умолчанию
-    default_preferences = {
-        'categories': [],
-        'theme': 'light',
-    }
-    
-    # Объединяем с настройками по умолчанию
-    for key, value in default_preferences.items():
-        preferences[key] = preferences.get(key, value)
-    
-    # Создаем форму с текущими настройками
-    form_initial = {
-        'categories': preferences.get('categories', []),
-        'theme': preferences.get('theme', 'light'),
-    }
-    
-    form = NewsPreferencesForm(initial=form_initial)
-    
-    if request.method == 'POST' and 'reset' not in request.POST:
-        form = NewsPreferencesForm(request.POST)
-        if form.is_valid():
-            # Сохраняем настройки в cookies
-            response = redirect('index')
-            preferences = {
-                'categories': form.cleaned_data['categories'],
-                'theme': form.cleaned_data['theme'],
-            }
-            response.set_cookie('news_preferences', json.dumps(preferences), max_age=30*24*60*60)
-            return response
-    
     # Данные новостей
     news_items = [
         {
@@ -88,7 +41,7 @@ def index(request):
             'title': 'Культурные события недели', 
             'category': 'culture', 
             'date': '2025-01-11',
-            'image': 'culture-news.jpg', 
+            'image': 'culture-news.jpg',
             'content': 'В столице открылась новая выставка современного искусства.'
         },
         {
@@ -101,31 +54,64 @@ def index(request):
         }
     ]
     
-    selected_categories = preferences.get('categories', [])
-    if not selected_categories:
-        filtered_news = news_items
-    else:
+    # Получаем настройки из cookies
+    categories_cookie = request.COOKIES.get('categories', '')
+    language_cookie = request.COOKIES.get('language', 'ru')
+    theme_cookie = request.COOKIES.get('theme', 'light')
+    
+    # Преобразуем строку категорий в список
+    selected_categories = categories_cookie.split(',') if categories_cookie else []
+    
+    # Обработка POST запроса (сохранение настроек)
+    if request.method == 'POST':
+        # Получаем данные из формы
+        categories = request.POST.getlist('categories', [])
+        language = request.POST.get('language', 'ru')
+        theme = request.POST.get('theme', 'light')
+        
+        # Создаем response с обновленными cookies
+        response = redirect('index')
+        response.set_cookie('categories', ','.join(categories), max_age=30*24*60*60)
+        response.set_cookie('language', language, max_age=30*24*60*60)
+        response.set_cookie('theme', theme, max_age=30*24*60*60)
+        return response
+    
+    # Обработка сброса настроек
+    if 'reset' in request.GET:
+        response = redirect('index')
+        response.delete_cookie('categories')
+        response.delete_cookie('language')
+        response.delete_cookie('theme')
+        return response
+    
+    # Фильтруем новости по выбранным категориям
+    if selected_categories and selected_categories != ['']:
         filtered_news = [news for news in news_items if news['category'] in selected_categories]
+    else:
+        filtered_news = news_items
+    
+    # Подготавливаем данные для шаблона
+    categories_list = [
+        {'code': 'politics', 'name_ru': 'Политика', 'name_en': 'Politics'},
+        {'code': 'tech', 'name_ru': 'Технологии', 'name_en': 'Technology'},
+        {'code': 'sports', 'name_ru': 'Спорт', 'name_en': 'Sports'},
+        {'code': 'economy', 'name_ru': 'Экономика', 'name_en': 'Economy'},
+        {'code': 'culture', 'name_ru': 'Культура', 'name_en': 'Culture'},
+        {'code': 'science', 'name_ru': 'Наука', 'name_en': 'Science'},
+    ]
+    
+    # Проверяем, какие категории выбраны
+    for category in categories_list:
+        category['checked'] = category['code'] in selected_categories
     
     context = {
-        'form': form,
         'news_items': filtered_news,
-        'preferences': preferences,
+        'categories': categories_list,
+        'preferences': {
+            'language': language_cookie,
+            'theme': theme_cookie,
+        },
+        'selected_categories': selected_categories,
     }
+    
     return render(request, 'myapp/index.html', context)
-
-def save_visited_page(request, page_name):
-    visited_pages = request.COOKIES.get('visited_pages', '[]')
-    try:
-        visited_pages = json.loads(visited_pages)
-    except json.JSONDecodeError:
-        visited_pages = []
-    
-    if page_name not in visited_pages:
-        visited_pages.append(page_name)
-        if len(visited_pages) > 5:
-            visited_pages = visited_pages[-5:]
-    
-    response = HttpResponse(f"Страница {page_name} посещена")
-    response.set_cookie('visited_pages', json.dumps(visited_pages), max_age=30*24*60*60)
-    return response

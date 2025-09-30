@@ -1,99 +1,122 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ preferences.language }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонализированные новости</title>
-    <link rel="shortcut icon" href="static/images/favicon.ico" />
+    <title>{% if preferences.language == 'en' %}Personalized News{% else %}Персонализированные новости{% endif %}</title>
     <link rel="stylesheet" href="/static/css/style.css">
     {% if preferences.theme == 'dark' %}
     <link rel="stylesheet" href="/static/css/theme-dark.css">
-    {% else %}
-    {# style.css #}
     {% endif %}
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📰 Персонализированные новости</h1>
-            <p>Настройте свою ленту новостей по вашим предпочтениям</p>
+            <h1>📰 {% if preferences.language == 'en' %}Personalized News{% else %}Персонализированные новости{% endif %}</h1>
+            <p>{% if preferences.language == 'en' %}Customize your news feed{% else %}Настройте свою ленту новостей{% endif %}</p>
         </header>
 
         <main>
             <section class="preferences-form">
-                <h2>Настройки новостей</h2>
+                <h2>{% if preferences.language == 'en' %}News Settings{% else %}Настройки новостей{% endif %}</h2>
                 <form method="post">
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label>Категории новостей:</label>
-                        {{ form.categories }}
+                        <label>{% if preferences.language == 'en' %}Select news categories{% else %}Выберите категории новостей{% endif %}:</label>
+                        <div class="categories-list">
+                            {% for category in categories %}
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="categories" value="{{ category.code }}" 
+                                       {% if category.checked %}checked{% endif %}>
+                                {% if preferences.language == 'en' %}{{ category.name_en }}{% else %}{{ category.name_ru }}{% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label>Тема</label>
-                        {{ form.theme }}
+                        <label>{% if preferences.language == 'en' %}Interface language{% else %}Язык интерфейса{% endif %}</label>
+                        <select name="language">
+                            <option value="ru" {% if preferences.language == 'ru' %}selected{% endif %}>Русский</option>
+                            <option value="en" {% if preferences.language == 'en' %}selected{% endif %}>English</option>
+                        </select>
                     </div>
                     
-                    <button type="submit">Сохранить настройки</button>
+                    <div class="form-group">
+                        <label>{% if preferences.language == 'en' %}Theme{% else %}Тема оформления{% endif %}</label>
+                        <select name="theme">
+                            <option value="light" {% if preferences.theme == 'light' %}selected{% endif %}>
+                                {% if preferences.language == 'en' %}Light{% else %}Светлая{% endif %}
+                            </option>
+                            <option value="dark" {% if preferences.theme == 'dark' %}selected{% endif %}>
+                                {% if preferences.language == 'en' %}Dark{% else %}Темная{% endif %}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit">{% if preferences.language == 'en' %}Save settings{% else %}Сохранить настройки{% endif %}</button>
+                    <a href="?reset=true" class="reset-button">
+                        {% if preferences.language == 'en' %}Reset settings{% else %}Сбросить настройки{% endif %}
+                    </a>
                 </form>
             </section>
 
             <section class="news-feed">
-                <h2>Ваша лента новостей ({{ news_items|length }} новостей)</h2>
+                <h2>
+                    {% if preferences.language == 'en' %}Your news feed{% else %}Ваша лента новостей{% endif %} 
+                    ({{ news_items|length }} {% if preferences.language == 'en' %}news{% else %}новостей{% endif %})
+                </h2>
                 
                 <div class="news-grid">
                     {% for news in news_items %}
                     <div class="news-card">
                         <div class="news-image">
                             <img src="/static/images/{{ news.image }}" alt="{{ news.title }}" 
-                                onerror="this.src='/static/images/default-news.jpg'">
+                                 onerror="this.src='/static/images/default-news.jpg'">
                         </div>
                         <div class="news-content">
                             <h3>{{ news.title }}</h3>
-                            <p class="news-date">📅 {{ news.date }}</p>
-                            <p class="news-category">🏷️ {{ news.category }}</p>
+                            <p class="news-date">📅 {% if preferences.language == 'en' %}Date{% else %}Дата{% endif %}: {{ news.date }}</p>
+                            <p class="news-category">🏷️ {% if preferences.language == 'en' %}Category{% else %}Категория{% endif %}: {{ news.category }}</p>
                             <p class="news-excerpt">{{ news.content }}</p>
-                            <a href="/visited/news-{{ news.id }}/" class="read-more">Читать далее →</a>
+                            <a href="#" class="read-more">
+                                {% if preferences.language == 'en' %}Read more →{% else %}Читать далее →{% endif %}
+                            </a>
                         </div>
                     </div>
                     {% empty %}
                     <div class="no-news">
-                        <p>Новости не найдены. Попробуйте изменить фильтры или сбросить настройки.</p>
-                        <form method="post" style="margin-top: 20px;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset" value="true">
-                            <button type="submit" style="background: #28a745;">Сбросить настройки</button>
-                        </form>
+                        <p>{% if preferences.language == 'en' %}No news found. Try changing filters.{% else %}Новости не найдены. Попробуйте изменить фильтры.{% endif %}</p>
                     </div>
                     {% endfor %}
                 </div>
             </section>
 
             <section class="additional-content">
-                <h2>О нашем сервисе</h2>
+                <h2>{% if preferences.language == 'en' %}About our service{% else %}О нашем сервисе{% endif %}</h2>
                 <div class="content-grid">
                     <div class="content-card">
-                        <img src="/static/images/news-icon.png" alt="Новости" width="50">
-                        <h3>Актуальные новости</h3>
-                        <p>Всегда свежие и проверенные новости из надежных источников</p>
+                        <img src="/static/images/news-icon.png" alt="News" width="50">
+                        <h3>{% if preferences.language == 'en' %}Latest News{% else %}Актуальные новости{% endif %}</h3>
+                        <p>{% if preferences.language == 'en' %}Fresh and verified news from reliable sources{% else %}Всегда свежие и проверенные новости{% endif %}</p>
                     </div>
                     <div class="content-card">
-                        <img src="/static/images/personalization-icon.png" alt="Персонализация" width="50">
-                        <h3>Индивидуальный подход</h3>
-                        <p>Только те новости, которые интересны именно вам</p>
+                        <img src="/static/images/personalization-icon.png" alt="Personalization" width="50">
+                        <h3>{% if preferences.language == 'en' %}Individual Approach{% else %}Индивидуальный подход{% endif %}</h3>
+                        <p>{% if preferences.language == 'en' %}Only news that interests you{% else %}Только те новости, которые интересны вам{% endif %}</p>
                     </div>
                     <div class="content-card">
-                        <img src="/static/images/security-icon.png" alt="Безопасность" width="50">
-                        <h3>Конфиденциальность</h3>
-                        <p>Ваши предпочтения сохраняются только локально</p>
+                        <img src="/static/images/security-icon.png" alt="Security" width="50">
+                        <h3>{% if preferences.language == 'en' %}Privacy{% else %}Конфиденциальность{% endif %}</h3>
+                        <p>{% if preferences.language == 'en' %}Your preferences are stored locally{% else %}Ваши предпочтения сохраняются локально{% endif %}</p>
                     </div>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>© 2025 Персонализированные новости. Все права защищены.</p>
+            <p>© 2025 {% if preferences.language == 'en' %}Personalized News{% else %}Персонализированные новости{% endif %}</p>
         </footer>
     </div>
 </body>
